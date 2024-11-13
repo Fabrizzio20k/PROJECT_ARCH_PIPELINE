@@ -1,10 +1,8 @@
-module imem (
-    a,
-    rd
+module imem(
+    input [31:0] a,
+    output [31:0] rd
 );
-  input wire [31:0] a;
-  output wire [31:0] rd;
-  reg [31:0] RAM[63:0];
-  initial $readmemh("memfile.dat", RAM);
-  assign rd = RAM[a[31:2]];
+    reg [31:0] RAM [0:2097151];
+    initial $readmemh("memfile.dat", RAM);
+    assign rd = RAM[a[22:2]]; // word aligned
 endmodule

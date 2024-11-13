@@ -1,58 +1,89 @@
 module arm(
-    clk,
-    reset,
-    PC,
-    Instr,
-    MemWrite,
-    ALUResult,
-    WriteData,
-    ReadData
+    input clk, reset,
+    output [31:0] PCF,
+    input [31:0] InstrF,
+    output MemWriteM,
+    output [31:0] ALUOutM, WriteDataM,
+    input [31:0] ReadDataM
 );
-  input wire clk;
-  input wire reset;
-  output wire [31:0] PC;
-  input wire [31:0] Instr;
-  output wire MemWrite;
-  output wire [31:0] ALUResult;
-  output wire [31:0] WriteData;
-  input wire [31:0] ReadData;
-  wire [3:0] ALUFlags;
-  wire RegWrite;
-  wire ALUSrc;
-  wire MemtoReg;
-  wire PCSrc;
-  wire [1:0] RegSrc;
-  wire [1:0] ImmSrc;
-  wire [1:0] ALUControl;
-  controller c (
-      .clk(clk),
-      .reset(reset),
-      .Instr(Instr[31:12]),
-      .ALUFlags(ALUFlags),
-      .RegSrc(RegSrc),
-      .RegWrite(RegWrite),
-      .ImmSrc(ImmSrc),
-      .ALUSrc(ALUSrc),
-      .ALUControl(ALUControl),
-      .MemWrite(MemWrite),
-      .MemtoReg(MemtoReg),
-      .PCSrc(PCSrc)
-  );
-  datapath dp (
-      .clk(clk),
-      .reset(reset),
-      .RegSrc(RegSrc),
-      .RegWrite(RegWrite),
-      .ImmSrc(ImmSrc),
-      .ALUSrc(ALUSrc),
-      .ALUControl(ALUControl),
-      .MemtoReg(MemtoReg),
-      .PCSrc(PCSrc),
-      .ALUFlags(ALUFlags),
-      .PC(PC),
-      .Instr(Instr),
-      .ALUResult(ALUResult),
-      .WriteData(WriteData),
-      .ReadData(ReadData)
-  );
+    wire [1:0] RegSrcD, ImmSrcD, ALUControlE;
+    wire ALUSrcE, BranchTakenE, MemtoRegW, PCSrcW, RegWriteW;
+    wire [3:0] ALUFlagsE;
+    wire [31:0] InstrD;
+    wire RegWriteM, MemtoRegE, PCWrPendingF;
+    wire [1:0] ForwardAE, ForwardBE;
+    wire StallF, StallD, FlushD, FlushE;
+    wire Match_1E_M, Match_1E_W, Match_2E_M, Match_2E_W, Match_12D_E;
+
+    controller c(
+        .clk(clk),
+        .reset(reset),
+        .InstrD(InstrD[31:12]),
+        .ALUFlagsE(ALUFlagsE),
+        .RegSrcD(RegSrcD),
+        .ImmSrcD(ImmSrcD),
+        .ALUSrcE(ALUSrcE),
+        .BranchTakenE(BranchTakenE),
+        .ALUControlE(ALUControlE),
+        .MemWriteM(MemWriteM),
+        .MemtoRegW(MemtoRegW),
+        .PCSrcW(PCSrcW),
+        .RegWriteW(RegWriteW),
+        .RegWriteM(RegWriteM),
+        .MemtoRegE(MemtoRegE),
+        .PCWrPendingF(PCWrPendingF),
+        .FlushE(FlushE)
+    );
+
+    datapath dp(
+        .clk(clk),
+        .reset(reset),
+        .RegSrcD(RegSrcD),
+        .ImmSrcD(ImmSrcD),
+        .ALUSrcE(ALUSrcE),
+        .BranchTakenE(BranchTakenE),
+        .ALUControlE(ALUControlE),
+        .MemtoRegW(MemtoRegW),
+        .PCSrcW(PCSrcW),
+        .RegWriteW(RegWriteW),
+        .PCF(PCF),
+        .InstrF(InstrF),
+        .InstrD(InstrD),
+        .ALUOutM(ALUOutM),
+        .WriteDataM(WriteDataM),
+        .ReadDataM(ReadDataM),
+        .ALUFlagsE(ALUFlagsE),
+        .Match_1E_M(Match_1E_M),
+        .Match_1E_W(Match_1E_W),
+        .Match_2E_M(Match_2E_M),
+        .Match_2E_W(Match_2E_W),
+        .Match_12D_E(Match_12D_E),
+        .ForwardAE(ForwardAE),
+        .ForwardBE(ForwardBE),
+        .StallF(StallF),
+        .StallD(StallD),
+        .FlushD(FlushD)
+    );
+
+    hazard h(
+        .clk(clk),
+        .reset(reset),
+        .Match_1E_M(Match_1E_M),
+        .Match_1E_W(Match_1E_W),
+        .Match_2E_M(Match_2E_M),
+        .Match_2E_W(Match_2E_W),
+        .Match_12D_E(Match_12D_E),
+        .RegWriteM(RegWriteM),
+        .RegWriteW(RegWriteW),
+        .BranchTakenE(BranchTakenE),
+        .MemtoRegE(MemtoRegE),
+        .PCWrPendingF(PCWrPendingF),
+        .PCSrcW(PCSrcW),
+        .ForwardAE(ForwardAE),
+        .ForwardBE(ForwardBE),
+        .StallF(StallF),
+        .StallD(StallD),
+        .FlushD(FlushD),
+        .FlushE(FlushE)
+    );
 endmodule

@@ -1,37 +1,32 @@
-module top (
-    clk,
-    reset,
-    WriteData,
-    DataAdr,
-    MemWrite
+module top(
+    input clk, reset,
+    output [31:0] WriteDataM, DataAdrM,
+    output MemWriteM
 );
-  input wire clk;
-  input wire reset;
-  output wire [31:0] WriteData;
-  output wire [31:0] DataAdr;
-  output wire MemWrite;
-  wire [31:0] PC;
-  wire [31:0] Instr;
-  wire [31:0] ReadData;
-  arm arm (
-      .clk(clk),
-      .reset(reset),
-      .PC(PC),
-      .Instr(Instr),
-      .MemWrite(MemWrite),
-      .ALUResult(DataAdr),
-      .WriteData(WriteData),
-      .ReadData(ReadData)
-  );
-  imem imem (
-      .a (PC),
-      .rd(Instr)
-  );
-  dmem dmem (
-      .clk(clk),
-      .we (MemWrite),
-      .a  (DataAdr),
-      .wd (WriteData),
-      .rd (ReadData)
-  );
+    wire [31:0] PCF, InstrF, ReadDataM;
+
+    // instantiate processor and memories
+    arm arm_inst(
+        .clk(clk),
+        .reset(reset),
+        .PCF(PCF),
+        .InstrF(InstrF),
+        .MemWriteM(MemWriteM),
+        .ALUOutM(DataAdrM),
+        .WriteDataM(WriteDataM),
+        .ReadDataM(ReadDataM)
+    );
+
+    imem imem_inst(
+        .a(PCF),
+        .rd(InstrF)
+    );
+
+    dmem dmem_inst(
+        .clk(clk),
+        .we(MemWriteM),
+        .a(DataAdrM),
+        .wd(WriteDataM),
+        .rd(ReadDataM)
+    );
 endmodule
